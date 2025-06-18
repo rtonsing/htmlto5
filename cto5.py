@@ -437,7 +437,7 @@ def main():
         new_content = convert_to_html5(content, lang=args.lang)
         
         # Always write as UTF-8
-        with open('output.html', 'w', encoding='utf-8') as f:
+        with open('output.htm', 'w', encoding='utf-8') as f:
             f.write(new_content)
             
     except Exception as e:
