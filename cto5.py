@@ -2,7 +2,8 @@
 import sys
 import re
 
-VERSION = "1.7.7"  # Added removal of CDATA sections in style tags
+VERSION = "1.7.8"  # Added replacement of <center> tags
+#VERSION = "1.7.7"  # Added removal of CDATA sections in style tags
 
 def print_version():
     """Print version information."""
@@ -20,14 +21,14 @@ def merge_styles(old_style, new_styles):
     """Merge new CSS styles with existing style attribute."""
     if not old_style:
         return '; '.join(s.strip() for s in new_styles.split(';') if s.strip()) + ';'
-    
+
     # Remove any quotes around the style content
     old_style = old_style.strip('"\'')
-    
+
     # Split and clean both old and new styles
     old_parts = [s.strip() for s in old_style.split(';') if s.strip()]
     new_parts = [s.strip() for s in new_styles.split(';') if s.strip()]
-    
+
     # Combine and join with semicolons
     all_parts = old_parts + new_parts
     return '; '.join(all_parts) + ';'
@@ -37,9 +38,9 @@ def convert_alignment_and_width(match):
     tag_start = match.group(1)
     attrs = match.group(2)
     tag_end = match.group(3)
-    
+
     styles = []
-    
+
     # Handle align attribute
     align_match = re.search(r'\balign=(["\'])(.*?)\1', attrs)
     if align_match:
@@ -47,7 +48,7 @@ def convert_alignment_and_width(match):
         styles.append(f"text-align: {align_value};")
         # Remove align attribute
         attrs = re.sub(r'\balign=(["\'])[^"\']*["\']', '', attrs)
-    
+
     # Handle width attribute
     width_match = re.search(r'\bwidth=(["\'])(\d+(?:\.\d+)?(?:%|em|px|rem|vw|vh)?)(["\'])', attrs)
     if width_match:
@@ -58,7 +59,7 @@ def convert_alignment_and_width(match):
         styles.append(f"width: {value};")
         # Remove width attribute
         attrs = re.sub(r'\bwidth=(["\'])[^"\']*["\']', '', attrs)
-    
+
     if styles:
         # Check for existing style attribute
         style_match = re.search(r'style=(["\'])(.*?)\1', attrs)
@@ -68,7 +69,7 @@ def convert_alignment_and_width(match):
             attrs = re.sub(r'style=(["\']).*?\1', f'style="{new_style}"', attrs)
         else:
             attrs = f' style="{" ".join(styles)}"'
-    
+
     # Add space after tag name if we have attributes
     if attrs.strip():
         return f"{tag_start} {attrs.strip()}{tag_end}"
@@ -80,14 +81,14 @@ def convert_table_attributes(match):
     tag_start = match.group(1)
     attrs = match.group(2)
     tag_end = match.group(3)
-    
+
     styles = []
     new_attrs = []
-    
+
     # Extract existing style attribute if present
     style_match = re.search(r'style=(["\'])(.*?)\1', attrs)
     existing_style = style_match.group(2) if style_match else ""
-    
+
     # Process attributes
     for attr in re.finditer(r'(\w+)=(["\'])(.*?)\2', attrs):
         name, _, value = attr.groups()
@@ -109,12 +110,12 @@ def convert_table_attributes(match):
         else:
             # Keep other attributes
             new_attrs.append(f'{name}="{value}"')
-    
+
     # Merge existing styles with new styles
     all_styles = merge_styles(existing_style, ' '.join(styles))
     if all_styles:
         new_attrs.append(f'style="{all_styles}"')
-    
+
     # Add space after tag name if we have attributes
     if new_attrs:
         return f"{tag_start} {' '.join(new_attrs)}{tag_end}"
@@ -125,14 +126,14 @@ def convert_to_html5(content, lang='en'):
     """Convert HTML content to HTML5."""
     # Remove forbidden control characters
     content = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]', '', content)
-    
+
     # Remove XML declaration and any following blank lines
     content = re.sub(
         r'<\?xml[^>]*\?>[\r\n]*[\n\r]*',
         '',
         content
     )
-    
+
     # First replace DOCTYPE
     content = re.sub(
         r'<!DOCTYPE[^>]*>',
@@ -150,17 +151,17 @@ def convert_to_html5(content, lang='en'):
         # Remove duplicate lang attributes
         lang_matches = re.finditer(r'\s+lang="([^"]*)"', full_tag)
         langs = [m.group(1) for m in lang_matches]
-        
+
         # Remove all lang attributes
         full_tag = re.sub(r'\s+lang="[^"]*"', '', full_tag)
-        
+
         # Add back the appropriate lang attribute
         if langs:
             # Use the first lang value found if any exist
             final_lang = langs[0]
         else:
             final_lang = lang
-            
+
         # Insert the lang attribute after the html tag
         full_tag = full_tag.replace('html', f'html lang="{final_lang}"', 1)
         return full_tag
@@ -172,7 +173,7 @@ def convert_to_html5(content, lang='en'):
         content,
         flags=re.IGNORECASE
     )
-    
+
     # Remove Content-Style-Type meta tag
     content = re.sub(
         r'[\s]*<meta[^>]*Content-Style-Type[^>]*/?>[\s]*\n?',
@@ -180,14 +181,14 @@ def convert_to_html5(content, lang='en'):
         content,
         flags=re.IGNORECASE
     )
-    
+
     # Replace or add UTF-8 charset meta tag
     old_meta = re.search(
         r'<meta[^>]+charset=[^>]*>|<meta\s+http-equiv=["\']Content-Type["\'][^>]*>',
         content,
         flags=re.IGNORECASE
     )
-    
+
     if old_meta:
         content = content.replace(old_meta.group(0), '<meta charset="utf-8">')
     else:
@@ -197,7 +198,7 @@ def convert_to_html5(content, lang='en'):
             content,
             flags=re.IGNORECASE
         )
-    
+
     # Remove xml:space attributes
     content = re.sub(
         r'\s+xml:space=["\'][^"\']*["\']',
@@ -205,7 +206,7 @@ def convert_to_html5(content, lang='en'):
         content,
         flags=re.IGNORECASE
     )
-    
+
     # Remove type="text/css" from style tags
     content = re.sub(
         r'<style\s+type=["\']text/css["\']',
@@ -232,7 +233,7 @@ def convert_to_html5(content, lang='en'):
         css_content = style_match.group(1)
         cleaned_css = clean_css_comments(css_content)
         content = content.replace(css_content, cleaned_css)
-    
+
     # Convert <tt> tags to span with monospace style
     content = re.sub(
         r'<tt([^>]*)>',
@@ -246,7 +247,7 @@ def convert_to_html5(content, lang='en'):
         content,
         flags=re.IGNORECASE
     )
-    
+
     # Convert <big> tags to span with style
     content = re.sub(
         r'<big([^>]*)>',
@@ -260,7 +261,21 @@ def convert_to_html5(content, lang='en'):
         content,
         flags=re.IGNORECASE
     )
-    
+
+    # Convert <center> tags to div with style
+    content = re.sub(
+        r'<center([^>]*)>',
+        r'<div style="text-align: center"\1>',
+        content,
+        flags=re.IGNORECASE
+    )
+    content = re.sub(
+        r'</center>',
+        '</div>',
+        content,
+        flags=re.IGNORECASE
+    )
+
     # Handle name and id attributes in anchors
     content = re.sub(
         r'<a([^>]*?)\s+id=(["\'][^"\']*["\'])\s+name=\2([^>]*?)>',  # id first, then name
@@ -280,7 +295,7 @@ def convert_to_html5(content, lang='en'):
         content,
         flags=re.IGNORECASE
     )
-    
+
     # Convert width and align attributes to CSS for various elements
     content = re.sub(
         r'(<(?:hr|table|td|th|div|p|h[1-6]))((?:\s+[^>]*)?)(\s*>)',
@@ -288,7 +303,7 @@ def convert_to_html5(content, lang='en'):
         content,
         flags=re.IGNORECASE
     )
-    
+
     # Convert table attributes to CSS
     content = re.sub(
         r'(<table)((?:\s+[^>]*)?)(\s*>)',
@@ -296,14 +311,14 @@ def convert_to_html5(content, lang='en'):
         content,
         flags=re.IGNORECASE
     )
-    
+
     def convert_cell_attrs_to_style(match):
         tag_start = match.group(1)
         attrs = match.group(2)
         tag_end = match.group(3)
-        
+
         styles = []
-        
+
         # Handle align attribute
         align_match = re.search(r'\balign=(["\'])(.*?)\1', attrs)
         if align_match:
@@ -311,7 +326,7 @@ def convert_to_html5(content, lang='en'):
             styles.append(f"text-align: {align_value};")
             # Remove align attribute
             attrs = re.sub(r'\balign=(["\']).*?\1', '', attrs)
-            
+
         # Handle valign attribute
         valign_match = re.search(r'\bvalign=(["\'])(.*?)\1', attrs)
         if valign_match:
@@ -319,7 +334,7 @@ def convert_to_html5(content, lang='en'):
             styles.append(f"vertical-align: {valign_value};")
             # Remove valign attribute
             attrs = re.sub(r'\bvalign=(["\']).*?\1', '', attrs)
-            
+
         if styles:
             # Check for existing style attribute
             style_match = re.search(r'style=(["\'])(.*?)\1', attrs)
@@ -329,7 +344,7 @@ def convert_to_html5(content, lang='en'):
                 attrs = re.sub(r'style=(["\']).*?\1', f'style="{new_style}"', attrs)
             else:
                 attrs = f' style="{" ".join(styles)}"'
-            
+
         # Add space after tag name if we have attributes
         if attrs.strip():
             return f"{tag_start} {attrs.strip()}{tag_end}"
@@ -343,16 +358,16 @@ def convert_to_html5(content, lang='en'):
         content,
         flags=re.IGNORECASE
     )
-    
+
     # Convert width/height with units on images to CSS
     def convert_img_sizes(match):
         full_tag = match.group(0)
-        
+
         # Find width/height with unit values (%, em, px, etc) or plain numbers
         width_match = re.search(r'\bwidth=(["\'])(\d+(?:\.\d+)?(?:%|em|px|rem|vw|vh)?)(["\'])', full_tag)
         height_match = re.search(r'\bheight=(["\'])(\d+(?:\.\d+)?(?:%|em|px|rem|vw|vh)?)(["\'])', full_tag)
         border_match = re.search(r'\bborder=(["\'])(\d+)(["\'])', full_tag)
-        
+
         # If we found any values, move them to style
         if width_match or height_match or border_match:
             styles = []
@@ -378,12 +393,12 @@ def convert_to_html5(content, lang='en'):
                     styles.append("border: none")
                 else:
                     styles.append(f"border: {value}px solid")
-                
+
             # Clean up the tag before adding style
             full_tag = re.sub(r'\s*/\s*>', '>', full_tag)  # Remove self-closing slash
             full_tag = re.sub(r'\s+', ' ', full_tag)       # Clean up spaces
             full_tag = full_tag.rstrip('>')                # Remove closing bracket temporarily
-                
+
             # Add or merge style attribute
             style_match = re.search(r'style=(["\'])(.*?)\1', full_tag)
             if style_match:
@@ -392,12 +407,12 @@ def convert_to_html5(content, lang='en'):
                 full_tag = re.sub(r'style=(["\']).*?\1', f'style="{new_style}"', full_tag)
             else:
                 full_tag = f'{full_tag.strip()} style="{"; ".join(styles)}"'
-            
+
             full_tag = f"{full_tag}>"  # Add back closing bracket
         else:
             # Just clean up self-closing slash if no width/height/border found
             full_tag = re.sub(r'\s*/\s*>', '>', full_tag)
-        
+
         return full_tag
 
     content = re.sub(
@@ -406,10 +421,10 @@ def convert_to_html5(content, lang='en'):
         content,
         flags=re.IGNORECASE
     )
-    
+
     # Convert self-closing tags
     content = re.sub(r'/>', '>', content)
-    
+
     return content
 
 def main():
@@ -418,11 +433,11 @@ def main():
     parser.add_argument('input_file', help='Input HTML file to convert')
     parser.add_argument('--lang', default='en', help='Language code for html tag (default: en)')
     parser.add_argument('--version', action='version', version=f'%(prog)s {VERSION}')
-    
+
     args = parser.parse_args()
-    
+
     print_version()
-    
+
     try:
         # Try UTF-8 first
         try:
@@ -432,18 +447,17 @@ def main():
             # If UTF-8 fails, try reading as iso-8859-1 and encode to UTF-8
             with open(args.input_file, 'r', encoding='iso-8859-1') as f:
                 content = f.read()
-        
+
         # Convert content
         new_content = convert_to_html5(content, lang=args.lang)
-        
+
         # Always write as UTF-8
         with open('output.htm', 'w', encoding='utf-8') as f:
             f.write(new_content)
-            
+
     except Exception as e:
         print(f"Error: {str(e)}", file=sys.stderr)
         sys.exit(1)
 
 if __name__ == '__main__':
     main()
-    
