@@ -1,3 +1,0 @@
-<a id='r1' /><a href='#f1' class='c013'><sup>[1]</sup></a>
-
- xml:lang="\w+"
