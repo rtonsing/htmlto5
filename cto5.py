@@ -19,6 +19,9 @@ def clean_css_comments(css_content):
 
 def merge_styles(old_style, new_styles):
     """Merge new CSS styles with existing style attribute."""
+    if not new_styles:
+        return old_style
+
     if not old_style:
         return '; '.join(s.strip() for s in new_styles.split(';') if s.strip()) + ';'
 
@@ -113,6 +116,7 @@ def convert_table_attributes(match):
 
     # Merge existing styles with new styles
     all_styles = merge_styles(existing_style, ' '.join(styles))
+
     if all_styles:
         new_attrs.append(f'style="{all_styles}"')
 
