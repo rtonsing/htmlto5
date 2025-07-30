@@ -2,8 +2,7 @@
 import sys
 import re
 
-VERSION = "1.7.8"  # Added replacement of <center> tags
-#VERSION = "1.7.7"  # Added removal of CDATA sections in style tags
+VERSION = "1.7.9"  # don't save empty table style
 
 def print_version():
     """Print version information."""
