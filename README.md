@@ -6,4 +6,5 @@ htmlto5 oldfile.html
 
 Result is written to output.htm in the current directory
 
-# Original source thanks to Roger Frank
+
+Original source thanks to Roger Frank
