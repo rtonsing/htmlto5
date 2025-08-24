@@ -281,19 +281,19 @@ def convert_to_html5(content, lang='en'):
 
     # Handle name and id attributes in anchors
     content = re.sub(
-        r'<a([^>]*?)\s+id=(["\'][^"\']*["\'])\s+name=\2([^>]*?)>',  # id first, then name
+        r'<a([^>]*?)\s+id\s*=\s*(["\'][^"\']*["\'])\s+name\s*=\s*\2([^>]*?)>',  # id first, then name
         r'<a\1 id=\2\3>',
         content,
         flags=re.IGNORECASE
     )
     content = re.sub(
-        r'<a([^>]*?)\s+name=(["\'][^"\']*["\'])\s+id=\2([^>]*?)>',  # name first, then id
+        r'<a([^>]*?)\s+name\s*=\s*(["\'][^"\']*["\'])\s+id\s*=\s*\2([^>]*?)>',  # name first, then id
         r'<a\1 id=\2\3>',
         content,
         flags=re.IGNORECASE
     )
     content = re.sub(
-        r'<a([^>]*?)\s+name=(["\'][^"\']*["\'])(?![^>]*?\s+id=)([^>]*?)>',  # only name exists
+        r'<a([^>]*?)\s+name\s*=\s*(["\'][^"\']*["\'])(?![^>]*?\s+id\s*=)\s*([^>]*?)>',  # only name exists
         r'<a\1 id=\2\3>',
         content,
         flags=re.IGNORECASE
