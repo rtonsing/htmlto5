@@ -212,7 +212,7 @@ def convert_to_html5(content, lang='en'):
 
     # Remove type="text/css" from style tags
     content = re.sub(
-        r'<style\s+type=["\']text/css["\']',
+        r'<style\s+type\s*=\s*["\']text/css["\']\s*',
         '<style',
         content,
         flags=re.IGNORECASE
