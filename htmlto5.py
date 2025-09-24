@@ -193,7 +193,7 @@ def convert_to_html5(content, lang='en'):
     )
 
     if old_meta:
-        content = content.replace(old_meta.group(0), '<meta charset="utf-8">')
+        content = content.replace(old_meta.group(0), '<meta charset="utf-8">\n')
     else:
         content = re.sub(
             r'(<head[^>]*>)',
