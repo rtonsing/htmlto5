@@ -210,6 +210,14 @@ def convert_to_html5(content, lang='en'):
         flags=re.IGNORECASE
     )
 
+    # Update title format
+    content = re.sub(
+        r'<title>\s*The Project Gutenberg eBook of (.+), by .+\s*</title>',
+        r'<title>\1 | Project Gutenberg</title>',
+        content,
+        flags=re.IGNORECASE
+    )
+
     # Remove type="text/css" from style tags
     content = re.sub(
         r'<style\s+type\s*=\s*["\']text/css["\']\s*',
