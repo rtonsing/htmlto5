@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import sys
 import re
 
@@ -463,7 +464,7 @@ def main():
         new_content = convert_to_html5(content, lang=args.lang)
 
         # Always write as UTF-8
-        with open('output.htm', 'w', encoding='utf-8') as f:
+        with open(os.path.join(os.path.dirname(args.input_file), 'output.htm'), 'w', encoding='utf-8') as f:
             f.write(new_content)
 
     except Exception as e:
